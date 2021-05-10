@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+//Basic gamemanager for the sake of simplicity I didn't split menu and ingame interactions
 public class GameManager : MonoBehaviour
 {
 

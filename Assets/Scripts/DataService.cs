@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 using System;
+//Used for data writing and reading
 public class DataService : MonoBehaviour
 {
     public class Game //LOCAL

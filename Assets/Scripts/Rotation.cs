@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+//Used for GameGround's rotation
 public class Rotation : MonoBehaviour
 {
     public Joystick Joystick;

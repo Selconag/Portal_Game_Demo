@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+//Classes for traps and other interactable objects
 public class Trap : MonoBehaviour
 {
     GameManager G;
@@ -47,7 +47,7 @@ public class Trap : MonoBehaviour
                 break;
         }
     }
-
+    //Used for changing playing ball's color change
     IEnumerator Change_Color(Collider col)
     {
         C = col.gameObject.GetComponent<Renderer>().material.color;
