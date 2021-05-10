@@ -5,6 +5,10 @@ using UnityEngine;
 public class Trap : MonoBehaviour
 {
     GameManager G;
+    Color C;
+    int Red;
+    int Blue;
+    int Green;
     private void Start()
     {
         G = GameObject.Find("GameManager").GetComponent<GameManager>();
@@ -13,14 +17,26 @@ public class Trap : MonoBehaviour
     {
         switch (this.gameObject.name)
         {
+            case "Wall":
+                //Change Color Randomly
+                StartCoroutine(Change_Color(other));
+                break;
             case "Spiketrap":
                 Destroy(other.gameObject);
                 G.Game_Resolution(false);
                 break;
             case "Bouncertrap":
-                other.attachedRigidbody.AddRelativeForce(Vector3.back * 500f);
+                other.attachedRigidbody.AddRelativeForce(Vector3.forward * 500f);
                 break;
-            case "Electrictrap":
+            case "Firetrap":
+                Destroy(other.gameObject);
+                G.Game_Resolution(false);
+                break;
+            case "Needle":
+                Destroy(other.gameObject);
+                G.Game_Resolution(false);
+                break;
+            case "Cutter":
                 Destroy(other.gameObject);
                 G.Game_Resolution(false);
                 break;
@@ -30,5 +46,17 @@ public class Trap : MonoBehaviour
                 Destroy(other.gameObject);
                 break;
         }
+    }
+
+    IEnumerator Change_Color(Collider col)
+    {
+        C = col.gameObject.GetComponent<Renderer>().material.color;
+        Red = Random.Range(0, 255);
+        Blue = Random.Range(0, 255);
+        Green = Random.Range(0, 255);
+        col.gameObject.GetComponent<Renderer>().material.color = new Color(Red, Blue, Green);
+        yield return new WaitForSeconds(1);
+        col.gameObject.GetComponent<Renderer>().material.color = C;
+        yield return new WaitForSeconds(1);
     }
 }

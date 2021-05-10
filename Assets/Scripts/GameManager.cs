@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+
 public class GameManager : MonoBehaviour
 {
 
@@ -11,6 +12,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject MenuPanel;
     [SerializeField] private GameObject MainMenuPanel;
     [SerializeField] private GameObject LevelSelectPanel;
+    [SerializeField] private GameObject InGameMenuPanel;
+    
 
     //Holds info text
     public Text InfoText;
@@ -19,10 +22,12 @@ public class GameManager : MonoBehaviour
 
     public Text LevelText;
     public Text PortalText;
+    //S is for Save
+    private DataService S;
 
-    
     //Global level variable for storing and using active level info
     private int level;
+    private int portal_amount;
 
     //Level selection happens here
     public void Select_Level(int select)
@@ -34,6 +39,8 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+        S = GameObject.Find("DataService").GetComponent<DataService>();
+        
         //Read Application.persistentDataPath for save game
         if (GameObject.Find("GameManager").GetComponent<GameManager>().isActiveAndEnabled)
         {
@@ -43,14 +50,27 @@ public class GameManager : MonoBehaviour
         {
             GameManager G = new GameManager();
         }
+        
     }
+
     //Continue from where you left
     public void Continue_Button()
     {
-        MainMenuPanel.SetActive(false);
-        MenuPanel.SetActive(false);
-        LevelSelectPanel.SetActive(false);
-        //Load the game
+        //Get the local save file
+        int level = S.GetGameSave_Level();
+        //If there is a local save
+        if(level > 0)
+        {
+            Draw_Level(false);
+            MainMenuPanel.SetActive(false);
+            MenuPanel.SetActive(false);
+            LevelSelectPanel.SetActive(false);
+        }
+        //Else (if there is not a local save)act as start button
+        else
+        {
+            Start_Button();
+        }
     }
     //Start the game from game panel
     public void Start_Button()
@@ -61,6 +81,7 @@ public class GameManager : MonoBehaviour
     //Exit from game
     public void Exit_Button()
     {
+        Save_System();
         Application.Quit();
     }
 
@@ -69,22 +90,46 @@ public class GameManager : MonoBehaviour
         MenuPanel.SetActive(true);
         LevelSelectPanel.SetActive(false);
     }
+    public void InGameMenu_Button()
+    {
+        Time.timeScale = 0;
+        InGameMenuPanel.SetActive(true);
+    }
+    public void ResumeGame_Button()
+    {
+        Time.timeScale = 1;
+        InGameMenuPanel.SetActive(false);
+    }
+    public void ReturntoMainMenu_Button()
+    {
+        Time.timeScale = 1;
+        Save_System();
+        Game_Resolution(false);
+        MainMenuPanel.SetActive(true);
+        MenuPanel.SetActive(true);
+        InGameMenuPanel.SetActive(false);
+    }
+
+    private void Save_System()
+    {
+        S.game.level = level;
+        S.game.portal_amount = portal_amount;
+        S.BuildGameSave();
+    }
+
     #endregion
 
 
     #region InGame
+    //The Prefab
     [SerializeField] private GameObject Ball;
+    //Prefabs Initial location
     [SerializeField] private Transform Ball_T;
     public GameObject GameGround_1;
     public GameObject GameGround_2;
     public GameObject GameGround_3;
-
-
-    private void Update()
-    {
-
-    }
-
+    //Instantiated object
+    private GameObject Player;
 
     //Takes info of resolution and calls Draw level depends on the situation
     public void Game_Resolution(bool Win)
@@ -92,20 +137,37 @@ public class GameManager : MonoBehaviour
         switch (level)
         {
             case 1:
+                GameGround_1.transform.rotation = Quaternion.Euler(0, 0, 0); 
                 GameGround_1.SetActive(false);
                 break;
             case 2:
+                GameGround_2.transform.rotation = Quaternion.Euler(0, 0, 0);
                 GameGround_2.SetActive(false);
                 break;
             case 3:
-                GameGround_3.SetActive(false);
+                GameGround_3.transform.rotation = Quaternion.Euler(0, 0, 0);
+                GameGround_3.SetActive(false);  
                 break;
         }
+
         InfoPanel.SetActive(true);
+        //Tell User he/she win this level
         if (Win)
+        {
+            InfoText.text = "You Win!";
             ButtonNext.SetActive(true);
+        }
+        //Tell User he/she lose this level so must retry or exit
         else
+        {
+            InfoText.text = "You Lose";
             ButtonRetry.SetActive(true);
+            if (Player.activeInHierarchy)
+            {
+                Destroy(Player);
+            }
+        }
+            
     }
     //Gets the active level info
     //if there is a save, loads that level
@@ -123,6 +185,10 @@ public class GameManager : MonoBehaviour
         InfoPanel.SetActive(false);
         switch (level)
         {
+            case 0:
+                GameGround_1.SetActive(true);
+                GameGround_1.transform.rotation = Quaternion.Euler(0, 0, 0);
+                break;
             case 1:
                 GameGround_1.SetActive(true);
                 GameGround_1.transform.rotation = Quaternion.Euler(0, 0, 0);
@@ -136,10 +202,8 @@ public class GameManager : MonoBehaviour
                 GameGround_3.transform.rotation = Quaternion.Euler(0, 0, 0);
                 break;
         }
-        //Not working right now
-        //GameObject.Find("GameGround_" + level).SetActive(true);
-        //Spawn ball
-        GameObject Player = Instantiate(Ball,Ball_T);
+        //Instantiate a ball
+        Player = Instantiate(Ball,Ball_T);
     }
     #endregion
 }

@@ -123,3 +123,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a293913dafefdf040a2dcffffb7e692f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  HoverAmount: 0.7

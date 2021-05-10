@@ -9,5 +9,6 @@ public class Ball : MonoBehaviour
     {
         //The object is stuck at the surface's collider so we need to hover it
         this.gameObject.GetComponent<Rigidbody>().AddForce(Vector3.up * HoverAmount);
+        
     }
 }
