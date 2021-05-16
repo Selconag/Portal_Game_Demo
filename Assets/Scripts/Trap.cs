@@ -2,61 +2,38 @@
 using System.Collections.Generic;
 using UnityEngine;
 //Classes for traps and other interactable objects
-public class Trap : MonoBehaviour
+public enum TrapType { Killer, Portal, Bouncer}
+public abstract class Trap : MonoBehaviour
 {
-    GameManager G;
-    Color C;
-    int Red;
-    int Blue;
-    int Green;
+    public abstract void ActivateTrap(Collider other);
+    
+
+    GameManager m_G;
     private void Start()
     {
-        G = GameObject.Find("GameManager").GetComponent<GameManager>();
+        m_G = GameObject.Find("GameManager").GetComponent<GameManager>();
     }
-    private void OnTriggerEnter(Collider other)
+    public void GameCondition(TrapType Trap)
     {
-        switch (this.gameObject.name)
+        switch (Trap)
         {
-            case "Wall":
-                //Change Color Randomly
-                StartCoroutine(Change_Color(other));
+            case TrapType.Bouncer:
+                //Push the Ball
                 break;
-            case "Spiketrap":
-                Destroy(other.gameObject);
-                G.Game_Resolution(false);
+            case TrapType.Killer:
+                //Set the game as losed
+                m_G.Game_Resolution(false);
                 break;
-            case "Bouncertrap":
-                other.attachedRigidbody.AddRelativeForce(Vector3.forward * 500f);
-                break;
-            case "Firetrap":
-                Destroy(other.gameObject);
-                G.Game_Resolution(false);
-                break;
-            case "Needle":
-                Destroy(other.gameObject);
-                G.Game_Resolution(false);
-                break;
-            case "Cutter":
-                Destroy(other.gameObject);
-                G.Game_Resolution(false);
-                break;
-            case "Portal":
-                //Succes on level
-                G.Game_Resolution(true);
-                Destroy(other.gameObject);
+            case TrapType.Portal:
+                //Set the game as winned
+                m_G.Game_Resolution(true);
                 break;
         }
     }
-    //Used for changing playing ball's color change
-    IEnumerator Change_Color(Collider col)
-    {
-        C = col.gameObject.GetComponent<Renderer>().material.color;
-        Red = Random.Range(0, 255);
-        Blue = Random.Range(0, 255);
-        Green = Random.Range(0, 255);
-        col.gameObject.GetComponent<Renderer>().material.color = new Color(Red, Blue, Green);
-        yield return new WaitForSeconds(1);
-        col.gameObject.GetComponent<Renderer>().material.color = C;
-        yield return new WaitForSeconds(1);
-    }
+}
+
+public interface IChangeColor
+{
+    //Destroy this game object
+    IEnumerator ActivateWall(Collider other);
 }

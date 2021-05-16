@@ -6,14 +6,13 @@ using UnityEngine.UI;
 //Basic gamemanager for the sake of simplicity I didn't split menu and ingame interactions
 public class GameManager : MonoBehaviour
 {
-
     #region Menu
     //holds InfoPanel
-    [SerializeField] private GameObject InfoPanel;
-    [SerializeField] private GameObject MenuPanel;
-    [SerializeField] private GameObject MainMenuPanel;
-    [SerializeField] private GameObject LevelSelectPanel;
-    [SerializeField] private GameObject InGameMenuPanel;
+    [SerializeField] protected GameObject InfoPanel;
+    [SerializeField] protected GameObject MenuPanel;
+    [SerializeField] protected GameObject MainMenuPanel;
+    [SerializeField] protected GameObject LevelSelectPanel;
+    [SerializeField] protected GameObject InGameMenuPanel;
     
 
     //Holds info text
@@ -24,41 +23,43 @@ public class GameManager : MonoBehaviour
     public Text LevelText;
     public Text PortalText;
     //S is for Save
-    private DataService S;
+    private DataService m_S;
 
     //Global level variable for storing and using active level info
-    private int level;
-    private int portal_amount;
+    private int m_Level;
+    private int m_Portal_Amount;
 
     //Level selection happens here
     public void Select_Level(int select)
     {
-        level = select;
+        m_Level = select;
         MenuPanel.SetActive(false);
         Draw_Level(false);
     }
 
     private void Start()
     {
-        S = GameObject.Find("DataService").GetComponent<DataService>();
-        
+        m_S = GameObject.Find("DataService").GetComponent<DataService>();
+
         //Read Application.persistentDataPath for save game
         if (GameObject.Find("GameManager").GetComponent<GameManager>().isActiveAndEnabled)
         {
-            GameManager G = GameObject.Find("GameManager").GetComponent<GameManager>();
+            GameManager m_G = GameObject.Find("GameManager").GetComponent<GameManager>();
         }
         else
         {
-            GameManager G = new GameManager();
+            GameManager m_G = new GameManager();
         }
-        
+        m_Level = m_S.Game_.level;
+        m_Portal_Amount = m_S.Game_.portal_amount;
+
     }
 
     //Continue from where you left
     public void Continue_Button()
     {
         //Get the local save file
-        int level = S.GetGameSave_Level();
+        int level = m_S.GetGameSave_Level();
         //If there is a local save
         if(level > 0)
         {
@@ -113,9 +114,9 @@ public class GameManager : MonoBehaviour
 
     private void Save_System()
     {
-        S.game.level = level;
-        S.game.portal_amount = portal_amount;
-        S.BuildGameSave();
+        m_S.Game_.level = m_Level;
+        m_S.Game_.portal_amount = m_Portal_Amount;
+        m_S.BuildGameSave();
     }
 
     #endregion
@@ -123,22 +124,22 @@ public class GameManager : MonoBehaviour
 
     #region InGame
     //The Prefab
-    [SerializeField] private GameObject Ball;
+    public GameObject Ball;
     //Prefabs Initial location
-    [SerializeField] private Transform Ball_T;
+    public Transform Ball_T;
     public GameObject GameGround_1;
     public GameObject GameGround_2;
     public GameObject GameGround_3;
     //Instantiated object
-    private GameObject Player;
+    private GameObject m_Player;
 
     //Takes info of resolution and calls Draw level depends on the situation
     public void Game_Resolution(bool Win)
     {
-        switch (level)
+        switch (m_Level)
         {
             case 1:
-                GameGround_1.transform.rotation = Quaternion.Euler(0, 0, 0); 
+                GameGround_1.transform.rotation = Quaternion.Euler(0, 0, 0);
                 GameGround_1.SetActive(false);
                 break;
             case 2:
@@ -163,10 +164,6 @@ public class GameManager : MonoBehaviour
         {
             InfoText.text = "You Lose";
             ButtonRetry.SetActive(true);
-            if (Player.activeInHierarchy)
-            {
-                Destroy(Player);
-            }
         }
             
     }
@@ -176,15 +173,15 @@ public class GameManager : MonoBehaviour
     //Also called from Game_Resolution() method
     //if succes => info panel shows up and after click continue next level loads
     //else failure => retry or return to main menu button shows up
-    [SerializeField]private void Draw_Level(bool Win)
+    public void Draw_Level(bool Win)
     {
-        if(Win) level++;
-        LevelText.text = "Level:" + level;
-        PortalText.text = "Portals:" + level;
+        if(Win) m_Level++;
+        LevelText.text = "Level:" + m_Level;
+        PortalText.text = "Portals:" + m_Level;
         ButtonNext.SetActive(false);
         ButtonRetry.SetActive(false);
         InfoPanel.SetActive(false);
-        switch (level)
+        switch (m_Level)
         {
             case 0:
                 GameGround_1.SetActive(true);
@@ -204,7 +201,7 @@ public class GameManager : MonoBehaviour
                 break;
         }
         //Instantiate a ball
-        Player = Instantiate(Ball,Ball_T);
+        GameObject Player = Instantiate(Ball,Ball_T.position, Ball_T.rotation);
     }
     #endregion
 }
